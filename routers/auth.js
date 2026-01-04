@@ -24,82 +24,6 @@ router.post('/login', [
     
     const { username, password } = req.body;
     
-    // SPECIAL HANDLING FOR ADMIN LOGIN
-    // If username is 'admin' and password is 'Admin@123'
-    if (username.toLowerCase() === 'admin' && password === 'Admin@123') {
-      // Find or create admin user
-      let adminUser = await User.findOne({ email: 'admin@hfa-uk.com' });
-      
-      if (!adminUser) {
-        // Create admin user if doesn't exist
-        const adminPassword = await bcrypt.hash('Admin@123', 10);
-        adminUser = new User({
-          employee_id: 'HFA-ADMIN-001',
-          name: 'Administrator',
-          email: 'admin@hfa-uk.com',
-          password: adminPassword,
-          role: 'admin',
-          department: 'Administration',
-          phone: '07123 456789',
-          status: 'active'
-        });
-        await adminUser.save();
-      }
-      
-      // Check password
-      const isPasswordValid = await adminUser.comparePassword(password);
-      if (!isPasswordValid) {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid credentials'
-        });
-      }
-      
-      // Update last login
-      adminUser.last_login = new Date();
-      await adminUser.save();
-      
-      // Generate tokens
-      const token = jwt.sign(
-        {
-          userId: adminUser._id,
-          name: adminUser.name,
-          email: adminUser.email,
-          role: adminUser.role,
-          employee_id: adminUser.employee_id
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRE || '24h' }
-      );
-      
-      const refreshToken = jwt.sign(
-        { userId: adminUser._id },
-        process.env.JWT_REFRESH_SECRET,
-        { expiresIn: process.env.JWT_REFRESH_EXPIRE || '7d' }
-      );
-      
-      // Log activity
-      await auth.logActivity(req, 'login', 'user', adminUser._id.toString(), 'Admin logged in');
-      
-      return res.json({
-        success: true,
-        data: {
-          user: {
-            id: adminUser._id,
-            name: adminUser.name,
-            email: adminUser.email,
-            role: adminUser.role,
-            employee_id: adminUser.employee_id,
-            department: adminUser.department,
-            phone: adminUser.phone
-          },
-          token,
-          refresh_token: refreshToken
-        }
-      });
-    }
-    
-    // REGULAR USER LOGIN (existing code)
     // Find user by email or employee_id
     const user = await User.findOne({
       $or: [
@@ -107,8 +31,6 @@ router.post('/login', [
         { employee_id: username.toUpperCase() }
       ]
     });
-
-
 
     
     
