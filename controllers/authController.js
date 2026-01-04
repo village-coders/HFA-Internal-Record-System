@@ -9,7 +9,9 @@ const signup = async (req, res, next)=>{
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
 
-        const user = await userModel.create({...req.body, password: hashedPassword})
+        const userId = "HFA" + Math.floor(Math.random() * 1000000) 
+
+        const user = await userModel.create({...req.body, password: hashedPassword, userId})
 
         if(!user){
            return res.status(404).json({

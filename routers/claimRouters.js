@@ -8,7 +8,7 @@ const upload = require("../middlewares/upload")
 
 
 
-claimRouter.post("/", upload.fields([
+claimRouter.post("/create", upload.fields([
   { name: "file1", maxCount: 1 },
   { name: "file2", maxCount: 1 },
   { name: "file3", maxCount: 1 },
@@ -16,9 +16,9 @@ claimRouter.post("/", upload.fields([
   { name: "file5", maxCount: 1 }
 ]), isLoggedIn, createClaim)
 
-claimRouter.get("/all/", getAllClaims)
+claimRouter.get("/all", getAllClaims)
 
-claimRouter.get("/", isLoggedIn, getMyClaim)
+claimRouter.get("/my-claim", isLoggedIn, getMyClaim)
 
 
 module.exports = claimRouter
