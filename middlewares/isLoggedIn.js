@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const UserModel = require("../models/user")
+// const UserModel = require("../models/User")
 
 const isLoggedIn =  async (req, res, next)=>{
     let token;
@@ -27,7 +27,7 @@ const isLoggedIn =  async (req, res, next)=>{
     }
 
     req.user = user
-    
+
     console.log(user.id); 
     
     next()
