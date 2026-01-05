@@ -8,16 +8,6 @@ const User = require('../models/user');
 const auth = require('../middlewares/auth');
 
 // Configure multer for file upload
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/receipts/');
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
 const fileFilter = (req, file, cb) => {
   const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
   if (allowedTypes.includes(file.mimetype)) {
@@ -27,13 +17,17 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+
+const storage = multer.memoryStorage();
+
 const upload = multer({
-  storage: storage,
+  storage,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
+    fileSize: 5 * 1024 * 1024 // 5MB
   },
-  fileFilter: fileFilter
+  fileFilter
 });
+
 
 // @route   GET /api/claims
 // @desc    Get all claims (with filters)
@@ -160,18 +154,28 @@ router.get('/:id', auth.verifyToken, async (req, res) => {
 router.post('/', 
   auth.verifyToken,
   auth.checkRole('worker', 'admin'),
-  upload.single('receipt'),
+  upload.single('image'),
   [
     body('date').isISO8601().withMessage('Valid date is required'),
     body('claim_id').trim().notEmpty().withMessage('Claim_Id is required'),
     body('description').trim().notEmpty().withMessage('Description is required'),
     body('category').isIn(['Travel', 'Meal', 'Office Supplies', 'Equipment', 'Training', 'Other']),
     body('amount').isFloat({ min: 0 }).withMessage('Valid amount is required'),
-    body('notes').optional().trim()
+    body('notes').optional().trim(),
+    body('image').optional()
   ],
   async (req, res) => {
   try {
     // Check validation errors
+
+    // Add receipt if uploaded
+    if (req.file) {
+      const receipt = await uploadReceipt(req.file, req.user.userId);
+
+      claimData.receipt_filename = receipt.filename;
+      claimData.receipt_url = receipt.publicUrl;
+    }
+
     
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -207,9 +211,12 @@ router.post('/',
     
     // Add receipt if uploaded
     if (req.file) {
-      claimData.receipt_filename = req.file.filename;
-      claimData.receipt_url = `/uploads/receipts/${req.file.filename}`;
+      const receipt = await uploadReceipt(req.file, req.user.userId);
+
+      claim.receipt_filename = receipt.filename;
+      claim.receipt_url = receipt.publicUrl;
     }
+
     
     // Set initial status
     if (req.body.amount > 1000) {
