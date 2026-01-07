@@ -160,7 +160,7 @@ router.post('/',
     body('date').isISO8601().withMessage('Valid date is required'),
     body('claim_id').trim().notEmpty().withMessage('Claim_Id is required'),
     body('description').trim().notEmpty().withMessage('Description is required'),
-    body('category').isIn(['Travel', 'Meal', 'Office Supplies', 'Equipment', 'Training', 'Other']),
+    body('claim_type').isIn(['Audit', 'Supervision', 'Audit / Supervision', 'Payment Request Form', 'Meeting', 'Misscellaneous', 'Approved Supplier IT (Yearly)', 'Approved Supplier Admin (Yearly)', 'Approved Supplier IT (Monthly)', 'Approved Supplier Admin (Monthly)', 'Approved Supplier Training (Yearly)', 'Approved Supplier Training (Monthly)', 'Approved Supplier Advertisement (Yearly)', 'Approved Supplier Admin (Monthly)']),
     body('amount').isFloat({ min: 0 }).withMessage('Valid amount is required'),
     body('notes').optional().trim(),
     body('image').optional()
@@ -198,9 +198,9 @@ router.post('/',
       claim_id: req.body.claim_id,
       date: req.body.date,
       description: req.body.description,
-      category: req.body.category,
+      claim_type: req.body.claim_type,
       amount: req.body.amount,
-      currency: req.body.currency || 'GBP',
+      currency: req.body.currency || 'USD',
       notes: req.body.notes
     };
     

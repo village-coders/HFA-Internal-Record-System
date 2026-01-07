@@ -29,10 +29,10 @@ const claimSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  category: {
+  claim_type: {
     type: String,
     required: true,
-    enum: ['Travel', 'Meal', 'Office Supplies', 'Equipment', 'Training', 'Other']
+    enum: ['Audit', 'Supervision', 'Audit / Supervision', 'Payment Request Form', 'Meeting', 'Misscellaneous', 'Approved Supplier IT (Yearly)', 'Approved Supplier Admin (Yearly)', 'Approved Supplier IT (Monthly)', 'Approved Supplier Admin (Monthly)', 'Approved Supplier Training (Yearly)', 'Approved Supplier Training (Monthly)', 'Approved Supplier Advertisement (Yearly)', 'Approved Supplier Admin (Monthly)']
   },
   amount: {
     type: Number,
@@ -86,16 +86,11 @@ const claimSchema = new mongoose.Schema({
   payment_reference: {
     type: String
   },
-  recommendation: {
-    type: String,
-    trim: true
+  contact_person: {
+    type: String
   },
-  recommendation_by: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
-  recommendation_at: {
-    type: Date
+  contact_email: {
+    type: String
   },
   created_at: {
     type: Date,

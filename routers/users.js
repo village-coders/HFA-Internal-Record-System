@@ -270,10 +270,10 @@ router.put('/:id',
   }
 });
 
-// @route   DELETE /api/users/:id
+// @route   DELETE /api/users/:id/deactivate
 // @desc    Delete user (soft delete by changing status)
 // @access  Private (Admin only)
-router.delete('/:id', auth.verifyToken, auth.checkRole('admin'), async (req, res) => {
+router.delete('/:id/deactivate', auth.verifyToken, auth.checkRole('admin'), async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     
@@ -293,6 +293,8 @@ router.delete('/:id', auth.verifyToken, auth.checkRole('admin'), async (req, res
     }
     
     // Soft delete by changing status
+    
+
     user.status = 'inactive';
     await user.save();
     
@@ -303,6 +305,52 @@ router.delete('/:id', auth.verifyToken, auth.checkRole('admin'), async (req, res
     res.json({
       success: true,
       message: 'User deactivated successfully'
+    });
+    
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+});
+
+
+// @route   DELETE /api/users/:id/activate
+// @desc    Delete user (soft delete by changing status)
+// @access  Private (Admin only)
+router.delete('/:id/activate', auth.verifyToken, auth.checkRole('admin'), async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    // Prevent deleting own account
+    if (user._id.toString() === req.user.userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot active your own account'
+      });
+    }
+    
+    // Soft delete by changing status
+    
+
+    user.status = 'active';
+    await user.save();
+    
+    // Log activity
+    await auth.logActivity(req, 'delete', 'user', user._id.toString(), 
+      `Activate user ${user.employee_id}`);
+    
+    res.json({
+      success: true,
+      message: 'User activated successfully'
     });
     
   } catch (error) {
