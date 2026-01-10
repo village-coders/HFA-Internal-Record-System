@@ -288,11 +288,11 @@ router.delete('/:id/deactivate', auth.verifyToken, auth.checkRole('admin'), asyn
     if (user._id.toString() === req.user.userId) {
       return res.status(400).json({
         success: false,
-        message: 'Cannot delete your own account'
+        message: 'Cannot deactivate your own account'
       });
     }
     
-    // Soft delete by changing status
+    // Soft deactivate by changing status
     
 
     user.status = 'inactive';
@@ -317,7 +317,7 @@ router.delete('/:id/deactivate', auth.verifyToken, auth.checkRole('admin'), asyn
 
 
 // @route   DELETE /api/users/:id/activate
-// @desc    Delete user (soft delete by changing status)
+// @desc    Activate user (Activate by changing status)
 // @access  Private (Admin only)
 router.delete('/:id/activate', auth.verifyToken, auth.checkRole('admin'), async (req, res) => {
   try {
@@ -346,11 +346,58 @@ router.delete('/:id/activate', auth.verifyToken, auth.checkRole('admin'), async 
     
     // Log activity
     await auth.logActivity(req, 'delete', 'user', user._id.toString(), 
-      `Activate user ${user.employee_id}`);
+      `Activated user ${user.employee_id}`);
     
     res.json({
       success: true,
       message: 'User activated successfully'
+    });
+    
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+});
+
+
+// @route   DELETE /api/users/:id/delete
+// @desc    Delete user (Delete permanently)
+// @access  Private (Admin only)
+router.delete('/:id/delete', auth.verifyToken, auth.checkRole('admin'), async (req, res) => {
+  try {
+
+    const user = await User.findById(req.params.id);
+    
+
+    // Prevent deleting own account
+    if (user._id.toString() === req.user.userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete your own account'
+      });
+    }
+
+    const deleteUser = await User.findByIdAndDelete(req.params.id);
+    
+    if (!deleteUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    
+    
+    
+    // Log activity
+    await auth.logActivity(req, 'delete', 'user', user._id.toString(), 
+      `Deleted user ${user.employee_id}`);
+    
+    res.json({
+      success: true,
+      message: 'User deleted successfully'
     });
     
   } catch (error) {

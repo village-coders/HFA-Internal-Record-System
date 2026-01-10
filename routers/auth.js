@@ -27,8 +27,8 @@ router.post('/login', [
     // Find user by email or employee_id
     const user = await User.findOne({
       $or: [
-        { email: username.toLowerCase() },
-        { employee_id: username.toUpperCase() }
+        { email: username.trim().toLowerCase() },
+        { employee_id: username.trim().toUpperCase() }
       ]
     });
 

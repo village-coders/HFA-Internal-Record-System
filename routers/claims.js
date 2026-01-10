@@ -200,7 +200,7 @@ router.post('/',
       description: req.body.description,
       claim_type: req.body.claim_type,
       amount: req.body.amount,
-      currency: req.body.currency || 'USD',
+      currency: req.body.currency || '$',
       notes: req.body.notes
     };
     
@@ -215,11 +215,7 @@ router.post('/',
 
     
     // Set initial status
-    if (req.body.amount > 1000) {
-      claimData.status = 'pending'; // Requires approval for high amounts
-    } else {
-      claimData.status = 'new';
-    }
+    claimData.status = 'new';
     
     const claim = new Claim(claimData);
     await claim.save();

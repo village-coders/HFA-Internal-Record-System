@@ -12,7 +12,7 @@ const claimSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  user_name: {
+  claimant_name: {
     type: String,
     required: true
   },
@@ -41,7 +41,7 @@ const claimSchema = new mongoose.Schema({
   },
   currency: {
     type: String,
-    default: 'GBP'
+    default: '$'
   },
   receipt_url: {
     type: String,
